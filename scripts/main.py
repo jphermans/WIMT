@@ -13,8 +13,8 @@ st.set_page_config(
 # Custom CSS for Atlas Copco Group branding
 st.markdown("""
 <style>
-    /* Atlas Copco Group Color Variables */
-    :root {
+    /* Light Mode (Default) */
+    body {
         --atlas-teal: #054E5A;
         --atlas-white: #FFFFFF;
         --atlas-gray: #A1A9B4;
@@ -22,16 +22,85 @@ st.markdown("""
         --accent-green: #5D7875;
         --accent-light-green: #CED9D7;
         --accent-blue: #123F6D;
+        
+        /* Text colors */
+        --text-primary: #054E5A;
+        --text-secondary: #333333;
+        --text-on-dark: #FFFFFF;
+        --text-on-light: #054E5A;
+        
+        /* Background colors */
+        --bg-primary: #FFFFFF;
+        --bg-secondary: #CED9D7;
+        --bg-accent: #054E5A;
+    }
+    
+    /* Dark Mode */
+    body.dark-mode {
+        --atlas-teal: #1A7D8C; /* Lighter teal for better contrast */
+        --atlas-white: #FFFFFF;
+        --atlas-gray: #B8C0CC; /* Lighter gray */
+        --atlas-gold: #F0C794; /* Brighter gold */
+        --accent-green: #7DA5A0; /* Lighter green */
+        --accent-light-green: #2A3A38; /* Darker but still visible */
+        --accent-blue: #2A5E94; /* Lighter blue */
+        
+        /* Text colors for dark mode */
+        --text-primary: #E0E0E0;
+        --text-secondary: #B0B0B0;
+        --text-on-dark: #FFFFFF;
+        --text-on-light: #1A7D8C;
+        
+        /* Background colors for dark mode */
+        --bg-primary: #1E1E1E;
+        --bg-secondary: #2D3748;
+        --bg-accent: #1A7D8C;
+        
+        color-scheme: dark;
+    }
+    
+    /* Force dark mode for specific elements */
+    .dark-mode .stApp {
+        background-color: #1E1E1E !important;
+    }
+    
+    .dark-mode [data-testid="stHeader"] {
+        background-color: #1E1E1E !important;
+    }
+    
+    .dark-mode [data-testid="stToolbar"] {
+        background-color: #2D3748 !important;
+    }
+    
+    .dark-mode [data-testid="stSidebar"] {
+        background-color: #2D3748 !important;
+    }
+    
+    .dark-mode [data-testid="stSidebarUserContent"] {
+        background-color: #2D3748 !important;
+    }
+    
+    .dark-mode .main-content {
+        background-color: #1E1E1E !important;
+        color: #E0E0E0 !important;
+    }
+    
+    .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h4, .dark-mode h5, .dark-mode h6 {
+        color: #E0E0E0 !important;
+    }
+    
+    .dark-mode p, .dark-mode span, .dark-mode label, .dark-mode div {
+        color: #E0E0E0 !important;
     }
     
     /* Main app background */
     .stApp {
-        background-color: var(--atlas-white);
+        background-color: var(--bg-primary);
     }
     
     /* Main title styling */
     .main h1 {
-        color: var(--atlas-teal) !important;
+        color: var(--text-primary) !important;
         font-weight: bold !important;
         text-align: center !important;
         padding: 1rem 0 !important;
@@ -41,16 +110,16 @@ st.markdown("""
     
     /* Sidebar styling */
     .css-1d391kg {
-        background-color: var(--accent-light-green) !important;
+        background-color: var(--bg-secondary) !important;
     }
     
     .sidebar .sidebar-content {
-        background-color: var(--accent-light-green) !important;
+        background-color: var(--bg-secondary) !important;
     }
     
     /* Sidebar headers */
     .sidebar h2, .sidebar h3 {
-        color: var(--atlas-teal) !important;
+        color: var(--text-primary) !important;
         font-weight: bold !important;
     }
     
@@ -58,7 +127,7 @@ st.markdown("""
     .stButton > button[kind="primary"] {
         background-color: var(--atlas-teal) !important;
         border: none !important;
-        color: var(--atlas-white) !important;
+        color: var(--text-on-dark) !important;
         font-weight: bold !important;
         border-radius: 8px !important;
         transition: all 0.3s ease !important;
@@ -74,7 +143,7 @@ st.markdown("""
     .stButton > button {
         background-color: var(--atlas-gray) !important;
         border: 2px solid var(--atlas-teal) !important;
-        color: var(--atlas-teal) !important;
+        color: var(--text-on-light) !important;
         font-weight: bold !important;
         border-radius: 8px !important;
         transition: all 0.3s ease !important;
@@ -82,14 +151,14 @@ st.markdown("""
     
     .stButton > button:hover {
         background-color: var(--atlas-teal) !important;
-        color: var(--atlas-white) !important;
+        color: var(--text-on-dark) !important;
     }
     
     /* Download buttons */
     .stDownloadButton > button {
         background-color: var(--atlas-gold) !important;
         border: none !important;
-        color: var(--atlas-teal) !important;
+        color: var(--text-on-light) !important;
         font-weight: bold !important;
         border-radius: 8px !important;
         transition: all 0.3s ease !important;
@@ -103,7 +172,7 @@ st.markdown("""
     
     /* File uploader styling */
     .stFileUploader {
-        background-color: var(--atlas-white) !important;
+        background-color: var(--bg-primary) !important;
         border: 2px dashed var(--atlas-teal) !important;
         border-radius: 8px !important;
         padding: 1rem !important;
@@ -111,14 +180,19 @@ st.markdown("""
     
     /* Multiselect styling */
     .stMultiSelect > div > div {
-        background-color: var(--atlas-white) !important;
+        background-color: var(--bg-primary) !important;
         border: 2px solid var(--atlas-teal) !important;
         border-radius: 8px !important;
     }
     
+    /* Multiselect text */
+    .stMultiSelect label, .stMultiSelect span {
+        color: var(--text-primary) !important;
+    }
+    
     /* Checkbox styling */
     .stCheckbox > label {
-        color: var(--atlas-teal) !important;
+        color: var(--text-primary) !important;
         font-weight: 500 !important;
     }
     
@@ -133,7 +207,7 @@ st.markdown("""
     /* Info messages */
     .stInfo {
         background-color: var(--accent-light-green) !important;
-        color: var(--atlas-teal) !important;
+        color: var(--text-primary) !important;
         border-radius: 8px !important;
         border-left: 5px solid var(--accent-blue) !important;
     }
@@ -141,7 +215,7 @@ st.markdown("""
     /* Warning messages */
     .stWarning {
         background-color: var(--atlas-gold) !important;
-        color: var(--atlas-teal) !important;
+        color: var(--text-on-light) !important;
         border-radius: 8px !important;
         border-left: 5px solid var(--atlas-teal) !important;
     }
@@ -156,7 +230,7 @@ st.markdown("""
     
     /* Subheaders */
     .main h2, .main h3 {
-        color: var(--atlas-teal) !important;
+        color: var(--text-primary) !important;
         font-weight: bold !important;
         border-bottom: 2px solid var(--atlas-gold) !important;
         padding-bottom: 0.5rem !important;
@@ -172,7 +246,7 @@ st.markdown("""
     /* Dataframe headers */
     .stDataFrame thead th {
         background-color: var(--atlas-teal) !important;
-        color: var(--atlas-white) !important;
+        color: var(--text-on-dark) !important;
         font-weight: bold !important;
     }
     
@@ -198,14 +272,14 @@ st.markdown("""
     
     /* Sidebar file uploader */
     .sidebar .stFileUploader {
-        background-color: var(--atlas-white) !important;
+        background-color: var(--bg-primary) !important;
         border: 2px solid var(--atlas-teal) !important;
         border-radius: 8px !important;
     }
     
     /* Sidebar multiselect */
     .sidebar .stMultiSelect > div > div {
-        background-color: var(--atlas-white) !important;
+        background-color: var(--bg-primary) !important;
         border: 2px solid var(--atlas-teal) !important;
     }
     
@@ -216,11 +290,23 @@ st.markdown("""
         border-radius: 8px !important;
         border-left: 5px solid var(--atlas-teal) !important;
         margin: 1rem 0 !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .instructions h3 {
+        color: var(--text-primary) !important;
+        border-bottom: 1px solid var(--atlas-gold) !important;
+        padding-bottom: 0.5rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .instructions strong {
+        color: var(--atlas-teal) !important;
     }
     
     /* Custom card styling */
     .custom-card {
-        background-color: var(--atlas-white) !important;
+        background-color: var(--bg-primary) !important;
         padding: 1.5rem !important;
         border-radius: 8px !important;
         border: 2px solid var(--atlas-gray) !important;
@@ -237,19 +323,33 @@ st.markdown("""
     }
     
     .stMetric label {
-        color: var(--atlas-teal) !important;
+        color: var(--text-primary) !important;
         font-weight: bold !important;
     }
     
     .stMetric div {
-        color: var(--accent-blue) !important;
+        color: var(--text-primary) !important;
         font-weight: bold !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # Main title with custom styling
-st.markdown('<h1 style="color: #054E5A; text-align: center; font-weight: bold; padding: 1rem 0; border-bottom: 3px solid #E1B77E; margin-bottom: 2rem;">🔄 QAS <-> WIMT Converter</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-title">🔄 QAS <-> WIMT Converter</h1>', unsafe_allow_html=True)
+
+# Add the main-title class to the CSS
+st.markdown("""
+<style>
+.main-title {
+    color: var(--text-primary) !important;
+    text-align: center !important;
+    font-weight: bold !important;
+    padding: 1rem 0 !important;
+    border-bottom: 3px solid var(--atlas-gold) !important;
+    margin-bottom: 2rem !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Initialize session state
 if 'qas_df' not in st.session_state:
@@ -259,8 +359,236 @@ if 'wimt_df' not in st.session_state:
 if 'matched_data' not in st.session_state:
     st.session_state.matched_data = None
 
+# Check for dark mode preference in query params
+dark_mode_param = st.query_params.get('dark_mode', 'false').lower() == 'true'
+
+# Initialize dark mode state
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = dark_mode_param
+
+# Add JavaScript for direct dark mode control
+st.markdown("""
+<script>
+// Function to apply dark mode
+function applyDarkMode() {
+    const doc = window.parent.document;
+    const bodyEl = doc.body;
+    
+    // Add dark-mode class to body
+    bodyEl.classList.add('dark-mode');
+    
+    // Apply dark mode to all Streamlit containers
+    const containers = doc.querySelectorAll('[data-testid="stAppViewContainer"], [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stSidebar"], [data-testid="stSidebarUserContent"]');
+    containers.forEach(container => {
+        container.classList.add('dark-mode');
+    });
+    
+    // Store preference
+    localStorage.setItem('atlas_dark_mode', 'true');
+    
+    // Force dark mode with direct styles
+    const darkModeStyles = `
+        body.dark-mode, 
+        body.dark-mode [data-testid="stAppViewContainer"],
+        body.dark-mode [data-testid="stHeader"],
+        body.dark-mode [data-testid="stToolbar"],
+        body.dark-mode [data-testid="stSidebar"],
+        body.dark-mode [data-testid="stSidebarUserContent"] {
+            background-color: #1E1E1E !important;
+            color: #E0E0E0 !important;
+        }
+        
+        body.dark-mode h1, 
+        body.dark-mode h2, 
+        body.dark-mode h3, 
+        body.dark-mode h4, 
+        body.dark-mode h5, 
+        body.dark-mode h6,
+        body.dark-mode p,
+        body.dark-mode span,
+        body.dark-mode label,
+        body.dark-mode div {
+            color: #E0E0E0 !important;
+        }
+        
+        body.dark-mode [data-testid="stSidebar"] {
+            background-color: #2D3748 !important;
+        }
+        
+        body.dark-mode .stButton > button {
+            background-color: #B8C0CC !important;
+            color: #1A7D8C !important;
+        }
+        
+        body.dark-mode .stButton > button[kind="primary"] {
+            background-color: #1A7D8C !important;
+            color: #FFFFFF !important;
+        }
+        
+        body.dark-mode .stDownloadButton > button {
+            background-color: #F0C794 !important;
+            color: #1A7D8C !important;
+        }
+    `;
+    
+    // Add the styles to the document
+    const style = document.createElement('style');
+    style.textContent = darkModeStyles;
+    doc.head.appendChild(style);
+}
+
+// Function to apply light mode
+function applyLightMode() {
+    const doc = window.parent.document;
+    const bodyEl = doc.body;
+    
+    // Remove dark-mode class from body
+    bodyEl.classList.remove('dark-mode');
+    
+    // Remove dark mode from all Streamlit containers
+    const containers = doc.querySelectorAll('[data-testid="stAppViewContainer"], [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stSidebar"], [data-testid="stSidebarUserContent"]');
+    containers.forEach(container => {
+        container.classList.remove('dark-mode');
+    });
+    
+    // Store preference
+    localStorage.setItem('atlas_dark_mode', 'false');
+}
+
+// Function to toggle dark mode
+function toggleDarkMode(isDark) {
+    if (isDark) {
+        applyDarkMode();
+    } else {
+        applyLightMode();
+    }
+}
+
+// Check for saved preference or URL parameter on page load
+window.addEventListener('load', function() {
+    // Check URL parameter first
+    const urlParams = new URLSearchParams(window.location.search);
+    const darkModeParam = urlParams.get('dark_mode');
+    
+    if (darkModeParam === 'true') {
+        applyDarkMode();
+        
+        // Update the toggle state if needed
+        setTimeout(function() {
+            const darkModeToggle = window.parent.document.querySelector('button[kind="secondary"]:has(span:contains("Dark Mode"))');
+            if (darkModeToggle && !darkModeToggle.classList.contains('toggled')) {
+                darkModeToggle.click();
+            }
+        }, 500);
+    } 
+    // If no URL parameter, check localStorage
+    else if (darkModeParam !== 'false') {
+        const savedPreference = localStorage.getItem('atlas_dark_mode');
+        
+        if (savedPreference === 'true') {
+            applyDarkMode();
+            
+            // Update the toggle state if needed
+            setTimeout(function() {
+                const darkModeToggle = window.parent.document.querySelector('button[kind="secondary"]:has(span:contains("Dark Mode"))');
+                if (darkModeToggle && !darkModeToggle.classList.contains('toggled')) {
+                    darkModeToggle.click();
+                }
+            }, 500);
+        }
+    }
+    
+    // Apply dark mode immediately if the toggle is already on
+    setTimeout(function() {
+        const darkModeToggle = window.parent.document.querySelector('button[kind="secondary"]:has(span:contains("Dark Mode"))');
+        if (darkModeToggle && darkModeToggle.classList.contains('toggled')) {
+            applyDarkMode();
+        }
+    }, 100);
+});
+</script>
+""", unsafe_allow_html=True)
+
+# Function to toggle dark mode
+def toggle_dark_mode():
+    st.session_state.dark_mode = not st.session_state.dark_mode
+    # Set a flag to show the refresh message
+    st.session_state.dark_mode_toggle_clicked = True
+    
+    # Update query params to persist dark mode setting
+    st.query_params.update({'dark_mode': str(st.session_state.dark_mode).lower()})
+
+# Apply dark mode based on session state with more direct styling
+if st.session_state.dark_mode:
+    # Add direct CSS for dark mode
+    st.markdown("""
+    <style>
+    /* Direct dark mode styling */
+    body, 
+    [data-testid="stAppViewContainer"],
+    [data-testid="stHeader"],
+    [data-testid="stToolbar"],
+    [data-testid="stSidebar"],
+    [data-testid="stSidebarUserContent"] {
+        background-color: #1E1E1E !important;
+        color: #E0E0E0 !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6, p, span, label, div {
+        color: #E0E0E0 !important;
+    }
+    
+    [data-testid="stSidebar"] {
+        background-color: #2D3748 !important;
+    }
+    
+    .stButton > button {
+        background-color: #B8C0CC !important;
+        color: #1A7D8C !important;
+    }
+    
+    .stButton > button[kind="primary"] {
+        background-color: #1A7D8C !important;
+        color: #FFFFFF !important;
+    }
+    
+    .stDownloadButton > button {
+        background-color: #F0C794 !important;
+        color: #1A7D8C !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Also use JavaScript
+    st.markdown('<script>toggleDarkMode(true);</script>', unsafe_allow_html=True)
+else:
+    st.markdown('<script>toggleDarkMode(false);</script>', unsafe_allow_html=True)
+
 # Sidebar
 with st.sidebar:
+    # Dark mode toggle
+    st.header("Display Settings")
+    dark_mode = st.toggle("Dark Mode", value=st.session_state.dark_mode, key="dark_mode_toggle", on_change=toggle_dark_mode)
+    
+    # Add a note about refreshing for dark mode changes
+    if st.session_state.get('dark_mode_toggle_clicked', False):
+        st.info("Theme changes applied! For complete theme application, please refresh the page.")
+        # Add a refresh button
+        if st.button("Refresh Page"):
+            # Use the proper way to update query params for the refresh
+            current_params = dict(st.query_params)
+            current_params['dark_mode'] = str(st.session_state.dark_mode).lower()
+            query_string = '&'.join([f"{k}={v}" for k, v in current_params.items()])
+            
+            st.markdown(f"""
+            <script>
+                window.parent.location.href = window.parent.location.pathname + '?{query_string}';
+            </script>
+            """, unsafe_allow_html=True)
+            st.session_state.dark_mode_toggle_clicked = False
+    
+    st.divider()
+    
     st.header("File Upload")
     
     # QAS file upload
@@ -457,25 +785,71 @@ if st.session_state.qas_df is None or st.session_state.wimt_df is None:
     ### ✅ **Result**
     The app will find all rows where the selected columns have matching values and create a new file with the results.
     
+    ### 🌓 **Display Settings**
+    You can toggle between light and dark mode using the switch in the sidebar. The app will automatically detect your system preference, but you can manually override it at any time for better readability.
+    
     </div>
     """, unsafe_allow_html=True)
+
+# Add footer CSS
+st.markdown("""
+<style>
+.app-footer {
+    background: linear-gradient(135deg, var(--atlas-teal) 0%, var(--accent-blue) 100%);
+    color: var(--text-on-dark);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: 3rem;
+    box-shadow: 0 4px 12px rgba(5, 78, 90, 0.3);
+}
+
+.footer-title {
+    margin: 0;
+    color: var(--atlas-gold);
+    font-weight: bold;
+}
+
+.footer-subtitle {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--accent-light-green);
+}
+
+.footer-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--atlas-gray);
+}
+
+.footer-divider {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--accent-green);
+}
+
+.footer-small {
+    color: var(--accent-light-green);
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Footer with Atlas Copco Group branding
 st.divider()
 st.markdown("""
-<div class="footer" style="background: linear-gradient(135deg, #054E5A 0%, #123F6D 100%); color: white; padding: 2rem; border-radius: 12px; text-align: center; margin-top: 3rem; box-shadow: 0 4px 12px rgba(5, 78, 90, 0.3);">
+<div class="app-footer">
     <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 1rem;">
         <span style="font-size: 2rem;">🔄</span>
-        <h3 style="margin: 0; color: #E1B77E; font-weight: bold;">QAS <-> WIMT Converter</h3>
+        <h3 class="footer-title">QAS <-> WIMT Converter</h3>
     </div>
-    <p style="margin: 0.5rem 0; font-size: 1.1rem; color: #CED9D7;">
+    <p class="footer-subtitle">
         <strong>Atlas Copco Group</strong> | Data Comparison & Matching Tool
     </p>
-    <p style="margin: 0; font-size: 0.9rem; color: #A1A9B4;">
+    <p class="footer-text">
         Built with ❤️ using Streamlit & Python | Professional Data Processing Solution
     </p>
-    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #5D7875;">
-        <small style="color: #CED9D7;">
+    <div class="footer-divider">
+        <small class="footer-small">
             Streamline your data comparison workflow with enterprise-grade reliability
         </small>
     </div>
