@@ -9,7 +9,7 @@
 
 **A powerful Streamlit application for comparing and matching data between QAS and WIMT Excel files**
 
-[🚀 Quick Start](#-quick-start) • [📋 Features](#-features) • [🛠️ Installation](#️-installation) • [📖 Usage](#-usage) • [🤝 Contributing](#-contributing)
+[🚀 Quick Start](#-quick-start) • [📋 Features](#-features) • [🛠️ Installation](#️-installation) • [📖 Usage](#-usage) • [🌓 Dark Mode](#-dark-mode) • [🤝 Contributing](#-contributing)
 
 </div>
 
@@ -27,6 +27,7 @@
 ### 🌟 **Advanced Features**
 - **🔗 Composite Key Matching**: Combine multiple columns for complex comparisons
 - **🎨 Interactive UI**: Clean, intuitive sidebar interface
+- **🌓 Dark Mode Support**: Toggle between light and dark themes with Atlas Copco brand colors
 - **⚡ Fast Processing**: Efficient pandas-based data processing
 - **📱 Responsive Design**: Works on desktop and mobile devices
 - **🔄 Session State Management**: Maintains data across interactions
@@ -134,6 +135,7 @@ Follow the step-by-step process in the application!
 ### 🎛️ **Sidebar Components**
 | Component | Description | Icon |
 |-----------|-------------|------|
+| **Display Settings** | Toggle between light and dark mode | 🌓 |
 | **File Upload** | Upload QAS and WIMT Excel files | 📤 |
 | **Column Selection** | Multi-select dropdowns for columns | 🎯 |
 | **Settings** | Comparison and output options | ⚙️ |
@@ -147,6 +149,30 @@ Follow the step-by-step process in the application!
 | **Download Section** | Export options | 💾 Excel & CSV formats |
 
 ---
+
+## 🌓 **Dark Mode**
+
+### ✨ **Features**
+- **🎨 Atlas Copco Brand Colors**: Optimized for both light and dark themes
+- **🔄 Automatic Detection**: Detects system preference for dark/light mode
+- **👆 Manual Toggle**: Override system preference with a simple toggle
+- **💾 Persistent Settings**: Remembers your preference between sessions
+- **🔗 URL Parameter Support**: Share links with preferred theme (`?dark_mode=true/false`)
+
+### 🎨 **Color Adaptations**
+| Element | Light Mode | Dark Mode |
+|---------|------------|-----------|
+| **Background** | White (#FFFFFF) | Dark Gray (#1E1E1E) |
+| **Text** | Atlas Teal (#054E5A) | Light Gray (#E0E0E0) |
+| **Accent** | Atlas Gold (#E1B77E) | Bright Gold (#F0C794) |
+| **Buttons** | Atlas Teal (#054E5A) | Lighter Teal (#1A7D8C) |
+| **Sidebar** | Light Green (#CED9D7) | Dark Blue-Gray (#2D3748) |
+
+### 💡 **Usage Tips**
+- **System Match**: By default, matches your device's theme preference
+- **Toggle Switch**: Located at the top of the sidebar under "Display Settings"
+- **Refresh Button**: For complete theme application after toggling
+- **URL Sharing**: Add `?dark_mode=true` to the URL to share dark mode links
 
 ## 🔧 **Advanced Usage**
 
@@ -205,6 +231,21 @@ When multiple columns are selected, the app creates composite keys:
 ❌ Error: Download failed
 ✅ Solution: Ensure results exist before downloading
 ✅ Check: Browser download permissions
+```
+
+#### 🌓 **Dark Mode Issues**
+```
+❌ Issue: Dark mode toggle doesn't persist after refresh
+✅ Solution: Use the refresh button provided in the app
+✅ Check: Browser cookies and localStorage permissions
+
+❌ Issue: Incomplete theme application
+✅ Solution: Click the "Refresh Page" button after toggling
+✅ Alternative: Add ?dark_mode=true/false to the URL manually
+
+❌ Issue: Text hard to read in dark mode
+✅ Solution: The app has been optimized for Atlas Copco brand colors
+✅ If still having issues, please report them as a bug
 ```
 
 ---
