@@ -10,8 +10,246 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Main title
-st.title("QAS <-> WIMT Converter")
+# Custom CSS for Atlas Copco Group branding
+st.markdown("""
+<style>
+    /* Atlas Copco Group Color Variables */
+    :root {
+        --atlas-teal: #054E5A;
+        --atlas-white: #FFFFFF;
+        --atlas-gray: #A1A9B4;
+        --atlas-gold: #E1B77E;
+        --accent-green: #5D7875;
+        --accent-light-green: #CED9D7;
+        --accent-blue: #123F6D;
+    }
+    
+    /* Main app background */
+    .stApp {
+        background-color: var(--atlas-white);
+    }
+    
+    /* Main title styling */
+    .main h1 {
+        color: var(--atlas-teal) !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        padding: 1rem 0 !important;
+        border-bottom: 3px solid var(--atlas-gold) !important;
+        margin-bottom: 2rem !important;
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg {
+        background-color: var(--accent-light-green) !important;
+    }
+    
+    .sidebar .sidebar-content {
+        background-color: var(--accent-light-green) !important;
+    }
+    
+    /* Sidebar headers */
+    .sidebar h2, .sidebar h3 {
+        color: var(--atlas-teal) !important;
+        font-weight: bold !important;
+    }
+    
+    /* Primary buttons */
+    .stButton > button[kind="primary"] {
+        background-color: var(--atlas-teal) !important;
+        border: none !important;
+        color: var(--atlas-white) !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stButton > button[kind="primary"]:hover {
+        background-color: var(--accent-blue) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 8px rgba(5, 78, 90, 0.3) !important;
+    }
+    
+    /* Secondary buttons */
+    .stButton > button {
+        background-color: var(--atlas-gray) !important;
+        border: 2px solid var(--atlas-teal) !important;
+        color: var(--atlas-teal) !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stButton > button:hover {
+        background-color: var(--atlas-teal) !important;
+        color: var(--atlas-white) !important;
+    }
+    
+    /* Download buttons */
+    .stDownloadButton > button {
+        background-color: var(--atlas-gold) !important;
+        border: none !important;
+        color: var(--atlas-teal) !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stDownloadButton > button:hover {
+        background-color: var(--accent-green) !important;
+        color: var(--atlas-white) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    /* File uploader styling */
+    .stFileUploader {
+        background-color: var(--atlas-white) !important;
+        border: 2px dashed var(--atlas-teal) !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
+    }
+    
+    /* Multiselect styling */
+    .stMultiSelect > div > div {
+        background-color: var(--atlas-white) !important;
+        border: 2px solid var(--atlas-teal) !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Checkbox styling */
+    .stCheckbox > label {
+        color: var(--atlas-teal) !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Success messages */
+    .stSuccess {
+        background-color: var(--accent-green) !important;
+        color: var(--atlas-white) !important;
+        border-radius: 8px !important;
+        border-left: 5px solid var(--atlas-gold) !important;
+    }
+    
+    /* Info messages */
+    .stInfo {
+        background-color: var(--accent-light-green) !important;
+        color: var(--atlas-teal) !important;
+        border-radius: 8px !important;
+        border-left: 5px solid var(--accent-blue) !important;
+    }
+    
+    /* Warning messages */
+    .stWarning {
+        background-color: var(--atlas-gold) !important;
+        color: var(--atlas-teal) !important;
+        border-radius: 8px !important;
+        border-left: 5px solid var(--atlas-teal) !important;
+    }
+    
+    /* Error messages */
+    .stError {
+        background-color: #ff6b6b !important;
+        color: var(--atlas-white) !important;
+        border-radius: 8px !important;
+        border-left: 5px solid #d63031 !important;
+    }
+    
+    /* Subheaders */
+    .main h2, .main h3 {
+        color: var(--atlas-teal) !important;
+        font-weight: bold !important;
+        border-bottom: 2px solid var(--atlas-gold) !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    /* Dataframe styling */
+    .stDataFrame {
+        border: 2px solid var(--atlas-teal) !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+    }
+    
+    /* Dataframe headers */
+    .stDataFrame thead th {
+        background-color: var(--atlas-teal) !important;
+        color: var(--atlas-white) !important;
+        font-weight: bold !important;
+    }
+    
+    /* Dataframe rows */
+    .stDataFrame tbody tr:nth-child(even) {
+        background-color: var(--accent-light-green) !important;
+    }
+    
+    /* Dividers */
+    .stDivider {
+        border-color: var(--atlas-gold) !important;
+        border-width: 2px !important;
+    }
+    
+    /* Footer styling */
+    .footer {
+        background-color: var(--atlas-teal) !important;
+        color: var(--atlas-white) !important;
+        padding: 1rem !important;
+        border-radius: 8px !important;
+        margin-top: 2rem !important;
+    }
+    
+    /* Sidebar file uploader */
+    .sidebar .stFileUploader {
+        background-color: var(--atlas-white) !important;
+        border: 2px solid var(--atlas-teal) !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Sidebar multiselect */
+    .sidebar .stMultiSelect > div > div {
+        background-color: var(--atlas-white) !important;
+        border: 2px solid var(--atlas-teal) !important;
+    }
+    
+    /* Instructions section */
+    .instructions {
+        background-color: var(--accent-light-green) !important;
+        padding: 1.5rem !important;
+        border-radius: 8px !important;
+        border-left: 5px solid var(--atlas-teal) !important;
+        margin: 1rem 0 !important;
+    }
+    
+    /* Custom card styling */
+    .custom-card {
+        background-color: var(--atlas-white) !important;
+        padding: 1.5rem !important;
+        border-radius: 8px !important;
+        border: 2px solid var(--atlas-gray) !important;
+        box-shadow: 0 2px 4px rgba(5, 78, 90, 0.1) !important;
+        margin: 1rem 0 !important;
+    }
+    
+    /* Metric styling */
+    .stMetric {
+        background-color: var(--accent-light-green) !important;
+        padding: 1rem !important;
+        border-radius: 8px !important;
+        border-left: 4px solid var(--atlas-teal) !important;
+    }
+    
+    .stMetric label {
+        color: var(--atlas-teal) !important;
+        font-weight: bold !important;
+    }
+    
+    .stMetric div {
+        color: var(--accent-blue) !important;
+        font-weight: bold !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Main title with custom styling
+st.markdown('<h1 style="color: #054E5A; text-align: center; font-weight: bold; padding: 1rem 0; border-bottom: 3px solid #E1B77E; margin-bottom: 2rem;">🔄 QAS <-> WIMT Converter</h1>', unsafe_allow_html=True)
 
 # Initialize session state
 if 'qas_df' not in st.session_state:
@@ -203,25 +441,43 @@ if st.session_state.qas_df is None or st.session_state.wimt_df is None:
     st.divider()
     st.subheader("How to use:")
     st.markdown("""
-    1. **Upload Files**: Upload both QAS and WIMT Excel files using the sidebar
-    2. **Select Columns**: Choose one or more columns to compare from each file (you can select multiple columns)
-    3. **Configure Settings**: Set comparison options (case sensitivity, output format)
-    4. **Find Matches**: Click the "Find Matches" button to compare the selected columns
-    5. **Download Results**: Download the matching results as Excel or CSV file
+    <div class="instructions">
     
-    **Multi-column comparison**: When multiple columns are selected, the app will combine them to create a composite key for matching. For example, if you select columns A and B from both files, it will match rows where both A and B values are the same.
+    ### 📋 **Step-by-Step Guide**
     
+    1. **📤 Upload Files**: Upload both QAS and WIMT Excel files using the sidebar
+    2. **🎯 Select Columns**: Choose one or more columns to compare from each file (you can select multiple columns)
+    3. **⚙️ Configure Settings**: Set comparison options (case sensitivity, output format)
+    4. **🔍 Find Matches**: Click the "Find Matches" button to compare the selected columns
+    5. **💾 Download Results**: Download the matching results as Excel or CSV file
+    
+    ### 🔗 **Multi-column Comparison**
+    When multiple columns are selected, the app will combine them to create a composite key for matching. For example, if you select columns A and B from both files, it will match rows where both A and B values are the same.
+    
+    ### ✅ **Result**
     The app will find all rows where the selected columns have matching values and create a new file with the results.
-    """)
-
-# Footer
-st.divider()
-st.markdown("---")
-st.markdown(
-    """
-    <div style='text-align: center; color: #666;'>
-        <small>QAS <-> WIMT Converter | Built with Streamlit</small>
+    
     </div>
-    """,
-    unsafe_allow_html=True
-)
+    """, unsafe_allow_html=True)
+
+# Footer with Atlas Copco Group branding
+st.divider()
+st.markdown("""
+<div class="footer" style="background: linear-gradient(135deg, #054E5A 0%, #123F6D 100%); color: white; padding: 2rem; border-radius: 12px; text-align: center; margin-top: 3rem; box-shadow: 0 4px 12px rgba(5, 78, 90, 0.3);">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+        <span style="font-size: 2rem;">🔄</span>
+        <h3 style="margin: 0; color: #E1B77E; font-weight: bold;">QAS <-> WIMT Converter</h3>
+    </div>
+    <p style="margin: 0.5rem 0; font-size: 1.1rem; color: #CED9D7;">
+        <strong>Atlas Copco Group</strong> | Data Comparison & Matching Tool
+    </p>
+    <p style="margin: 0; font-size: 0.9rem; color: #A1A9B4;">
+        Built with ❤️ using Streamlit & Python | Professional Data Processing Solution
+    </p>
+    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #5D7875;">
+        <small style="color: #CED9D7;">
+            Streamline your data comparison workflow with enterprise-grade reliability
+        </small>
+    </div>
+</div>
+""", unsafe_allow_html=True)
