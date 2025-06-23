@@ -9,7 +9,7 @@
 
 **A powerful Streamlit application for comparing and matching data between QAS and WIMT Excel files**
 
-[🚀 Quick Start](#-quick-start) • [📋 Features](#-features) • [🛠️ Installation](#️-installation) • [📖 Usage](#-usage) • [🌓 Dark Mode](#-dark-mode) • [🤝 Contributing](#-contributing)
+[🚀 Quick Start](#-quick-start) • [📋 Features](#-features) • [🛠️ Installation](#️-installation) • [📖 Usage](#-usage) • [📊 Column Value Analysis](#-column-value-analysis) • [🌓 Dark Mode](#-dark-mode) • [🤝 Contributing](#-contributing)
 
 </div>
 
@@ -26,6 +26,7 @@
 
 ### 🌟 **Advanced Features**
 - **🔗 Composite Key Matching**: Combine multiple columns for complex comparisons
+- **📊 Column Value Analysis**: Analyze and visualize the distribution of values in any column
 - **🎨 Interactive UI**: Clean, intuitive sidebar interface
 - **🌓 Dark Mode Support**: Toggle between light and dark themes with Atlas Copco brand colors
 - **⚡ Fast Processing**: Efficient pandas-based data processing
@@ -145,10 +146,30 @@ Follow the step-by-step process in the application!
 | Section | Purpose | Features |
 |---------|---------|----------|
 | **File Previews** | Display uploaded data | 📋 First 10 rows, column info |
-| **Results Table** | Show matching records | 📈 Sortable, scrollable |
+| **Results Table** | Show matching records | 📈 Sortable, scrollable, column highlighting |
+| **Column Analysis** | Analyze column values | 📊 Statistics, charts, filtering |
 | **Download Section** | Export options | 💾 Excel & CSV formats |
 
 ---
+
+## 📊 **Column Value Analysis**
+
+### ✨ **Features**
+- **🔍 Column Selection**: Select any column from the matched results for visualization
+- **📊 Multiple Visualizations**: Bar charts, pie charts, and time series analysis
+- **🔎 Interactive Filtering**: Filter results based on specific column values
+- **🔄 Multi-Column Comparison**: Compare value distributions across different columns
+
+### 📊 **Visualization Options**
+- **Bar Charts**: Display value counts with downloadable data
+- **Pie Charts**: Show percentage distribution with Atlas Copco brand colors
+- **Time Series**: Automatically detect and analyze date/time columns
+
+### 🔍 **Interactive Features**
+- **Value Filtering**: Select specific values to filter the matched results
+- **Multi-Column Comparison**: Compare distributions across different columns
+- **Top-N Selection**: Control how many values to display in charts for columns with many unique values
+- **Data Export**: Download chart data or filtered results as CSV files
 
 ## 🌓 **Dark Mode**
 
@@ -224,6 +245,21 @@ When multiple columns are selected, the app creates composite keys:
 ❌ Issue: 0 matches returned
 ✅ Check: Column data types and case sensitivity
 ✅ Verify: Selected columns contain comparable data
+```
+
+#### 📊 **Column Analysis Issues**
+```
+❌ Issue: Charts not displaying properly
+✅ Solution: Try selecting a different column or limiting the number of values to display
+✅ Check: For columns with many unique values, use the slider to show fewer values
+
+❌ Issue: Pie chart not showing
+✅ Solution: Install plotly for enhanced visualizations: pip install plotly
+✅ Alternative: Use the bar chart view which works without additional dependencies
+
+❌ Issue: Time series analysis not available for date column
+✅ Solution: Ensure date format is recognizable (YYYY-MM-DD recommended)
+✅ Check: Column name contains 'date' or 'time' to help with auto-detection
 ```
 
 #### 💾 **Download Issues**

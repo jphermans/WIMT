@@ -734,10 +734,26 @@ if st.session_state.matched_data is not None:
     st.divider()
     st.subheader("Matching Results")
     
+    # Column selection for analysis
+    analysis_column = st.selectbox(
+        "Select a column to analyze:",
+        options=st.session_state.matched_data.columns.tolist()
+    )
+    
     col3, col4 = st.columns([3, 1])
     
     with col3:
-        st.dataframe(st.session_state.matched_data, use_container_width=True)
+        # Display the dataframe with highlighting for the selected column
+        st.dataframe(
+            st.session_state.matched_data,
+            use_container_width=True,
+            column_config={
+                analysis_column: st.column_config.Column(
+                    analysis_column,
+                    help=f"Selected column for analysis"
+                )
+            }
+        )
         st.info(f"Total matches found: {len(st.session_state.matched_data)}")
     
     with col4:
@@ -763,6 +779,187 @@ if st.session_state.matched_data is not None:
             file_name="qas_wimt_matches.csv",
             mime="text/csv"
         )
+    
+    # Column Value Analysis Section
+    if analysis_column:
+        st.divider()
+        st.subheader(f"Analysis of '{analysis_column}'")
+        
+        # Get value counts for the selected column
+        value_counts = st.session_state.matched_data[analysis_column].value_counts()
+        value_percent = st.session_state.matched_data[analysis_column].value_counts(normalize=True) * 100
+        
+        # Determine if we need to limit the display (if too many unique values)
+        unique_count = st.session_state.matched_data[analysis_column].nunique()
+        if unique_count > 10:
+            show_top_n = st.slider("Number of top values to display:", min_value=5, max_value=min(50, unique_count), value=10)
+            display_counts = value_counts.nlargest(show_top_n)
+            display_percent = value_percent.nlargest(show_top_n)
+        else:
+            display_counts = value_counts
+            display_percent = value_percent
+        
+        # Create visualization tabs for different chart types
+        chart_tab1, chart_tab2, chart_tab3 = st.tabs(["Bar Chart", "Pie Chart", "Time Series (if applicable)"])
+        
+        with chart_tab1:
+            st.bar_chart(display_counts)
+            
+            # Add a download button for the chart data
+            chart_data = pd.DataFrame({
+                'Value': display_counts.index,
+                'Count': display_counts.values,
+                'Percentage': display_percent.values
+            })
+            csv = chart_data.to_csv(index=False)
+            st.download_button(
+                label="Download Chart Data",
+                data=csv,
+                file_name=f"{analysis_column}_distribution.csv",
+                mime="text/csv"
+            )
+        
+        with chart_tab2:
+            # Create a pie chart using Plotly if available, otherwise use a workaround
+            try:
+                import plotly.express as px
+                fig = px.pie(
+                    values=display_counts.values,
+                    names=display_counts.index,
+                    title=f"Distribution of {analysis_column}"
+                )
+                # Use Atlas Copco colors
+                fig.update_traces(
+                    marker=dict(
+                        colors=['#054E5A', '#E1B77E', '#A1A9B4', '#5D7875', '#CED9D7', '#123F6D'] * 10
+                    )
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            except ImportError:
+                # Fallback if plotly is not available
+                st.write("Percentage Distribution:")
+                for value, percentage in zip(display_percent.index, display_percent.values):
+                    st.write(f"- **{value}**: {percentage:.2f}%")
+                st.info("Install plotly for interactive pie charts: `pip install plotly`")
+        
+        with chart_tab3:
+            # Check if the column might contain date information
+            is_date = False
+            if pd.api.types.is_datetime64_any_dtype(st.session_state.matched_data[analysis_column]):
+                is_date = True
+            elif 'date' in analysis_column.lower() or 'time' in analysis_column.lower():
+                try:
+                    # Try to convert to datetime
+                    date_series = pd.to_datetime(st.session_state.matched_data[analysis_column])
+                    is_date = True
+                    # Create a temporary column with the converted dates
+                    st.session_state.matched_data['_temp_date'] = date_series
+                except:
+                    is_date = False
+            
+            if is_date:
+                # Group by date and count
+                if '_temp_date' in st.session_state.matched_data.columns:
+                    time_series = st.session_state.matched_data['_temp_date'].dt.date.value_counts().sort_index()
+                    # Remove temporary column
+                    st.session_state.matched_data = st.session_state.matched_data.drop('_temp_date', axis=1)
+                else:
+                    time_series = st.session_state.matched_data[analysis_column].dt.date.value_counts().sort_index()
+                
+                # Convert to DataFrame for better display
+                time_df = pd.DataFrame(time_series)
+                time_df.columns = ['Count']
+                st.line_chart(time_df)
+            else:
+                st.info("This column doesn't appear to contain date/time data.")
+        
+        # Interactive Filtering
+        st.divider()
+        st.subheader("Interactive Filtering")
+        
+        # Get unique values for the selected column
+        unique_values = st.session_state.matched_data[analysis_column].dropna().unique().tolist()
+        
+        # Allow user to select values to filter by
+        filter_values = st.multiselect(
+            f"Filter results where {analysis_column} equals:",
+            options=unique_values
+        )
+        
+        if filter_values:
+            # Filter the dataframe
+            filtered_df = st.session_state.matched_data[st.session_state.matched_data[analysis_column].isin(filter_values)]
+            
+            # Show the filtered results
+            st.subheader(f"Filtered Results ({len(filtered_df)} rows)")
+            st.dataframe(
+                filtered_df,
+                use_container_width=True,
+                column_config={
+                    analysis_column: st.column_config.Column(
+                        analysis_column,
+                        help=f"Filtered by selected values"
+                    )
+                }
+            )
+            
+            # Add download option for filtered results
+            csv = filtered_df.to_csv(index=False)
+            st.download_button(
+                label="Download Filtered Results",
+                data=csv,
+                file_name=f"filtered_{analysis_column}.csv",
+                mime="text/csv"
+            )
+        
+        # Multiple Column Comparison
+        st.divider()
+        st.subheader("Multi-Column Comparison")
+        
+        # Allow selecting multiple columns for comparison
+        multi_column_analysis = st.checkbox("Compare with other columns")
+        
+        if multi_column_analysis:
+            # Get all columns except the already selected one
+            other_columns = [col for col in st.session_state.matched_data.columns if col != analysis_column]
+            
+            comparison_columns = st.multiselect(
+                "Select columns to compare with:",
+                options=other_columns
+            )
+            
+            if comparison_columns:
+                # Add the primary analysis column to the list
+                all_columns = [analysis_column] + comparison_columns
+                
+                # Create a comparison dataframe with value counts for each selected column
+                comparison_data = {}
+                for col in all_columns:
+                    # Get top 10 values for each column
+                    top_values = st.session_state.matched_data[col].value_counts().nlargest(10)
+                    # Convert index to string to avoid type comparison issues
+                    top_values.index = top_values.index.map(str)
+                    comparison_data[col] = top_values
+                
+                # Create a DataFrame for display with string index
+                comparison_df = pd.DataFrame(comparison_data).fillna(0)
+                
+                # Display comparison table
+                st.subheader("Value Count Comparison")
+                st.dataframe(comparison_df, use_container_width=True)
+                
+                # Create a grouped bar chart
+                st.subheader("Visual Comparison")
+                st.bar_chart(comparison_df)
+                
+                # Add download option for comparison data
+                csv = comparison_df.to_csv()
+                st.download_button(
+                    label="Download Comparison Data",
+                    data=csv,
+                    file_name="column_comparison.csv",
+                    mime="text/csv"
+                )
 
 # Instructions
 if st.session_state.qas_df is None or st.session_state.wimt_df is None:
