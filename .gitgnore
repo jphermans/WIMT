@@ -1,0 +1,93 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.manifest
+*.spec
+*.log
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+*.env
+
+# pipenv, poetry, hatch, etc.
+Pipfile.lock
+poetry.lock
+*.toml
+
+# Jupyter
+.ipynb_checkpoints
+
+# Pytest
+.cache/
+.pytest_cache/
+
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+.cache
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+
+# Pylint
+.pylint.d/
+
+# Pyre
+.pyre/
+
+# pytype
+.pytype/
+
+# Streamlit
+.streamlit/config.toml
+.streamlit/credentials.toml
+.streamlit/cache/
+.streamlit/*.json
+
+# Streamlit temporary file
+.streamlit/secrets.toml
+
+# === macOS ===
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# macOS metadata files
+Icon?
+._*
+
+# macOS trash
+.Trashes
+
+# === Windows ===
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# === VSCode ===
+.vscode/
+.history/
+
+# === Other ===
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# === Data folder (user-defined) ===
+Data/
