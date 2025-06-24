@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import re
 
 # Set page configuration
 st.set_page_config(
@@ -358,6 +359,125 @@ if 'wimt_df' not in st.session_state:
     st.session_state.wimt_df = None
 if 'matched_data' not in st.session_state:
     st.session_state.matched_data = None
+if 'duplicate_analysis' not in st.session_state:
+    st.session_state.duplicate_analysis = None
+
+# Duplicate detection functions
+def detect_serial_columns(df):
+    """Detect columns that likely contain serial numbers"""
+    serial_patterns = [
+        r'serial', r'sn\b', r'serial_number', r'serialnumber', 
+        r'serial_no', r'serialno', r'part_number', r'partnumber',
+        r'item_number', r'itemnumber', r'asset_number', r'assetnumber'
+    ]
+    
+    serial_columns = []
+    for col in df.columns:
+        col_lower = col.lower()
+        for pattern in serial_patterns:
+            if re.search(pattern, col_lower):
+                serial_columns.append(col)
+                break
+    
+    return serial_columns
+
+def detect_model_qas_columns(df):
+    """Detect columns that contain Model_QAS or similar"""
+    model_patterns = [
+        r'model_qas', r'modelqas', r'model', r'qas', 
+        r'model_type', r'modeltype', r'product_model', r'productmodel'
+    ]
+    
+    model_columns = []
+    for col in df.columns:
+        col_lower = col.lower()
+        for pattern in model_patterns:
+            if re.search(pattern, col_lower):
+                model_columns.append(col)
+                break
+    
+    return model_columns
+
+def analyze_duplicates(df):
+    """Analyze duplicates based on serial numbers and Model_QAS columns"""
+    if df is None or df.empty:
+        return None
+    
+    # Detect relevant columns
+    serial_cols = detect_serial_columns(df)
+    model_cols = detect_model_qas_columns(df)
+    
+    # If no relevant columns found, return empty analysis
+    if not serial_cols and not model_cols:
+        return {
+            'has_duplicates': False,
+            'duplicate_count': 0,
+            'total_rows': len(df),
+            'duplicate_percentage': 0.0,
+            'duplicate_rows': pd.DataFrame(),
+            'clean_data': df.copy(),
+            'columns_used': [],
+            'message': 'No serial number or Model_QAS columns detected for duplicate analysis.'
+        }
+    
+    # Combine all relevant columns for duplicate detection
+    duplicate_check_cols = serial_cols + model_cols
+    
+    # Remove duplicates from the list
+    duplicate_check_cols = list(set(duplicate_check_cols))
+    
+    # Create a subset with only the relevant columns for duplicate checking
+    if duplicate_check_cols:
+        # Create composite key for duplicate detection
+        df_temp = df.copy()
+        
+        # Handle missing values by converting to string
+        composite_key_parts = []
+        for col in duplicate_check_cols:
+            if col in df_temp.columns:
+                composite_key_parts.append(df_temp[col].fillna('').astype(str).str.lower())
+        
+        if composite_key_parts:
+            # Create composite key
+            df_temp['_duplicate_key'] = composite_key_parts[0]
+            for part in composite_key_parts[1:]:
+                df_temp['_duplicate_key'] = df_temp['_duplicate_key'] + '|' + part
+            
+            # Find duplicates
+            duplicate_mask = df_temp.duplicated(subset=['_duplicate_key'], keep=False)
+            duplicate_rows = df[duplicate_mask].copy()
+            
+            # Clean data (remove duplicates, keep first occurrence)
+            clean_data = df_temp.drop_duplicates(subset=['_duplicate_key'], keep='first')
+            clean_data = clean_data.drop('_duplicate_key', axis=1)
+            
+            # Calculate statistics
+            duplicate_count = duplicate_mask.sum()
+            total_rows = len(df)
+            duplicate_percentage = (duplicate_count / total_rows * 100) if total_rows > 0 else 0
+            
+            return {
+                'has_duplicates': duplicate_count > 0,
+                'duplicate_count': duplicate_count,
+                'total_rows': total_rows,
+                'duplicate_percentage': duplicate_percentage,
+                'duplicate_rows': duplicate_rows,
+                'clean_data': clean_data,
+                'columns_used': duplicate_check_cols,
+                'message': f'Duplicate analysis completed using columns: {", ".join(duplicate_check_cols)}'
+            }
+    
+    # Fallback if no valid columns found
+    return {
+        'has_duplicates': False,
+        'duplicate_count': 0,
+        'total_rows': len(df),
+        'duplicate_percentage': 0.0,
+        'duplicate_rows': pd.DataFrame(),
+        'clean_data': df.copy(),
+        'columns_used': [],
+        'message': 'No valid columns found for duplicate analysis.'
+    }
 
 # Check for dark mode preference in query params
 dark_mode_param = st.query_params.get('dark_mode', 'false').lower() == 'true'
@@ -698,6 +818,9 @@ with st.sidebar:
                     
                     st.success(f"Found {len(st.session_state.matched_data)} matches!")
                     
+                    # Perform duplicate analysis on the matched data
+                    st.session_state.duplicate_analysis = analyze_duplicates(st.session_state.matched_data)
+                    
                 except Exception as e:
                     st.error(f"Error during comparison: {str(e)}")
             
@@ -779,6 +902,197 @@ if st.session_state.matched_data is not None:
             file_name="qas_wimt_matches.csv",
             mime="text/csv"
         )
+    
+    # Duplicate Analysis Section
+    if st.session_state.duplicate_analysis is not None:
+        st.divider()
+        st.subheader("🔍 Duplicate Analysis")
+        
+        analysis = st.session_state.duplicate_analysis
+        
+        # Display analysis message
+        st.info(analysis['message'])
+        
+        # Create metrics columns
+        metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
+        
+        with metric_col1:
+            st.metric(
+                label="Total Records",
+                value=analysis['total_rows']
+            )
+        
+        with metric_col2:
+            st.metric(
+                label="Duplicate Records",
+                value=analysis['duplicate_count'],
+                delta=f"-{analysis['duplicate_count']} duplicates" if analysis['has_duplicates'] else "No duplicates"
+            )
+        
+        with metric_col3:
+            st.metric(
+                label="Clean Records",
+                value=len(analysis['clean_data']),
+                delta=f"{len(analysis['clean_data']) - analysis['total_rows']} after cleanup"
+            )
+        
+        with metric_col4:
+            st.metric(
+                label="Duplicate %",
+                value=f"{analysis['duplicate_percentage']:.1f}%"
+            )
+        
+        # Show columns used for duplicate detection
+        if analysis['columns_used']:
+            st.write("**Columns used for duplicate detection:**")
+            cols_display = ", ".join([f"`{col}`" for col in analysis['columns_used']])
+            st.markdown(f"- {cols_display}")
+        
+        # Display duplicate records if any found
+        if analysis['has_duplicates'] and not analysis['duplicate_rows'].empty:
+            st.divider()
+            
+            # Create tabs for different views
+            dup_tab1, dup_tab2, dup_tab3 = st.tabs(["🚨 Duplicate Records", "✅ Clean Data", "📊 Duplicate Patterns"])
+            
+            with dup_tab1:
+                st.subheader(f"Duplicate Records ({len(analysis['duplicate_rows'])} rows)")
+                st.warning(f"Found {analysis['duplicate_count']} duplicate records based on serial numbers and Model_QAS columns.")
+                
+                # Display duplicate records with highlighting
+                st.dataframe(
+                    analysis['duplicate_rows'],
+                    use_container_width=True,
+                    column_config={
+                        col: st.column_config.Column(
+                            col,
+                            help=f"Duplicate detection column" if col in analysis['columns_used'] else None
+                        ) for col in analysis['columns_used']
+                    }
+                )
+                
+                # Download duplicate records
+                dup_csv = analysis['duplicate_rows'].to_csv(index=False)
+                st.download_button(
+                    label="📥 Download Duplicate Records",
+                    data=dup_csv,
+                    file_name="duplicate_records.csv",
+                    mime="text/csv",
+                    help="Download only the duplicate records for review"
+                )
+            
+            with dup_tab2:
+                st.subheader(f"Clean Data ({len(analysis['clean_data'])} rows)")
+                st.success(f"Clean dataset with duplicates removed (kept first occurrence of each duplicate).")
+                
+                # Display clean data
+                st.dataframe(
+                    analysis['clean_data'],
+                    use_container_width=True
+                )
+                
+                # Download clean data
+                clean_output = io.BytesIO()
+                with pd.ExcelWriter(clean_output, engine='openpyxl') as writer:
+                    analysis['clean_data'].to_excel(writer, sheet_name='Clean_Data', index=False)
+                clean_output.seek(0)
+                
+                col_clean1, col_clean2 = st.columns(2)
+                
+                with col_clean1:
+                    st.download_button(
+                        label="📥 Download Clean Excel",
+                        data=clean_output.getvalue(),
+                        file_name="qas_wimt_clean_data.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        help="Download clean data without duplicates as Excel file"
+                    )
+                
+                with col_clean2:
+                    clean_csv = analysis['clean_data'].to_csv(index=False)
+                    st.download_button(
+                        label="📄 Download Clean CSV",
+                        data=clean_csv,
+                        file_name="qas_wimt_clean_data.csv",
+                        mime="text/csv",
+                        help="Download clean data without duplicates as CSV file"
+                    )
+            
+            with dup_tab3:
+                st.subheader("Duplicate Patterns Analysis")
+                
+                if analysis['columns_used']:
+                    # Analyze patterns in duplicate data
+                    dup_df = analysis['duplicate_rows']
+                    
+                    # Create composite key for grouping duplicates
+                    if len(analysis['columns_used']) > 0:
+                        # Show duplicate groups
+                        st.write("**Duplicate Groups:**")
+                        
+                        # Create a composite key to group duplicates
+                        composite_parts = []
+                        for col in analysis['columns_used']:
+                            if col in dup_df.columns:
+                                composite_parts.append(dup_df[col].fillna('').astype(str))
+                        
+                        if composite_parts:
+                            composite_key = composite_parts[0]
+                            for part in composite_parts[1:]:
+                                composite_key = composite_key + ' | ' + part
+                            
+                            # Count occurrences of each duplicate pattern
+                            duplicate_counts = composite_key.value_counts()
+                            
+                            # Display top duplicate patterns
+                            st.write(f"Top {min(10, len(duplicate_counts))} most common duplicate patterns:")
+                            
+                            pattern_data = []
+                            for pattern, count in duplicate_counts.head(10).items():
+                                pattern_data.append({
+                                    'Pattern': pattern,
+                                    'Occurrences': count,
+                                    'Percentage': f"{(count / len(dup_df) * 100):.1f}%"
+                                })
+                            
+                            pattern_df = pd.DataFrame(pattern_data)
+                            st.dataframe(pattern_df, use_container_width=True)
+                            
+                            # Visualize duplicate patterns
+                            if len(duplicate_counts) > 1:
+                                st.bar_chart(duplicate_counts.head(10))
+                else:
+                    st.info("No specific columns were used for duplicate detection.")
+        
+        else:
+            st.success("🎉 No duplicates found! Your data is clean.")
+            
+            # Still offer download of the original data
+            st.divider()
+            st.subheader("Download Original Data")
+            
+            original_output = io.BytesIO()
+            with pd.ExcelWriter(original_output, engine='openpyxl') as writer:
+                st.session_state.matched_data.to_excel(writer, sheet_name='Original_Data', index=False)
+            
+            col_orig1, col_orig2 = st.columns(2)
+            
+            with col_orig1:
+                st.download_button(
+                    label="📥 Download Original Excel",
+                    data=original_output.getvalue(),
+                    file_name="qas_wimt_original_data.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+            
+            with col_orig2:
+                original_csv = st.session_state.matched_data.to_csv(index=False)
+                st.download_button(
+                    label="📄 Download Original CSV",
+                    data=original_csv,
+                    file_name="qas_wimt_original_data.csv",
+                    mime="text/csv"
+                )
     
     # Column Value Analysis Section
     if analysis_column:
@@ -974,13 +1288,25 @@ if st.session_state.qas_df is None or st.session_state.wimt_df is None:
     2. **🎯 Select Columns**: Choose one or more columns to compare from each file (you can select multiple columns)
     3. **⚙️ Configure Settings**: Set comparison options (case sensitivity, output format)
     4. **🔍 Find Matches**: Click the "Find Matches" button to compare the selected columns
-    5. **💾 Download Results**: Download the matching results as Excel or CSV file
+    5. **🔍 Duplicate Analysis**: Automatically checks for duplicates based on serial numbers and Model_QAS columns
+    6. **💾 Download Results**: Download matching results, clean data, or duplicate records as Excel or CSV files
     
     ### 🔗 **Multi-column Comparison**
     When multiple columns are selected, the app will combine them to create a composite key for matching. For example, if you select columns A and B from both files, it will match rows where both A and B values are the same.
     
+    ### 🚨 **Duplicate Detection**
+    After finding matches, the app automatically analyzes the results for duplicates based on:
+    - **Serial Numbers**: Columns containing "serial", "SN", "part_number", etc.
+    - **Model_QAS**: Columns containing "model_qas", "model", "qas", etc.
+    
+    The duplicate analysis provides:
+    - **Statistics**: Total records, duplicate count, and percentage
+    - **Clean Data**: Dataset with duplicates removed (keeping first occurrence)
+    - **Duplicate Records**: Only the duplicate entries for review
+    - **Pattern Analysis**: Most common duplicate patterns and visualizations
+    
     ### ✅ **Result**
-    The app will find all rows where the selected columns have matching values and create a new file with the results.
+    The app will find all rows where the selected columns have matching values, check for duplicates, and provide multiple download options for clean or original data.
     
     ### 🌓 **Display Settings**
     You can toggle between light and dark mode using the switch in the sidebar. The app will automatically detect your system preference, but you can manually override it at any time for better readability.
